@@ -1,0 +1,17 @@
+[
+    {
+        "_id": 0,
+        "email": "raffiakdilputra123@gmail.com",
+        "hashed": "$2b$12$AvjeOnnks7rOg5DKMdBXjOkf/HULNFbtg5AT9jD4MWILnTjPgj8K2",
+        "content": {
+          "firstName": "Raffi",
+          "lastName": "Akhdilputra",
+          "tempat": "Jakarta",
+          "tanggalLahir": 31,
+          "bulanLahir": 7,
+          "tahunLahir": 2005,
+          "tanggalDibuat": "2024-12-31",
+          "bookshelf": []
+        }
+      }
+]
