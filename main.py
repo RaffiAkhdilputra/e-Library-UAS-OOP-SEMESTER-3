@@ -124,7 +124,7 @@ class Main(App):
         self.next_button = ctk.CTkButton(bottom_frame, text="Next", command=self.next, state="disabled")
         self.next_button.pack(side="left", padx=5, pady=5)
 
-        self.profile_button = ctk.CTkButton(bottom_frame, text="Profile", command=self.open_profile)
+        self.profile_button = ctk.CTkButton(bottom_frame, text="Profile", command= lambda: self.open_profile(self.username))
         self.profile_button.pack(side="right", padx=5, pady=5)
 
     def search_books(self):
@@ -219,10 +219,13 @@ class Main(App):
         Description(self.root, book, target_id)
 
     def open_profile(self, logged_account):
-        pass
+        Profile(self.root, logged_account)
 
     def run(self):
         self.root.mainloop()
+
+    def logout(self):
+        self.root.destroy()
 
 class Description(ctk.CTkToplevel):
     def __init__(self, master, book, target_id, *args, **kwargs):
@@ -277,6 +280,135 @@ class Description(ctk.CTkToplevel):
 
         read_links_button = ctk.CTkButton(self.container, text="Read Online", command=lambda: webbrowser.open(read_links))
         read_links_button.pack(padx=10, pady=10, fill = "x", expand=True)
+
+class Profile(ctk.CTkToplevel):
+    def __init__(self, master, logged_account, *args, **kwargs):
+        super().__init__(master)
+        self.logged_account = account.get_user(logged_account)
+        self.title("Account")
+
+        self.widget()
+
+    def widget(self):
+        self.geometry("500x400")
+        for widget in self.winfo_children():
+            widget.destroy()
+
+        # Frame
+        container = ctk.CTkFrame(self, fg_color="transparent")
+        container.pack(padx=3, pady=3, fill="both", expand=True)
+
+        # Display account details
+        email_label = ctk.CTkLabel(container, text=f"Email\t\t\t: {self.logged_account['email']}", wraplength=380, anchor="nw")
+        email_label.pack(side="top", padx=10, pady=3, fill = "x", expand=True)
+
+        name_label = ctk.CTkLabel(container, text=f"Nama\t\t\t: {self.logged_account['content']['firstName']} {self.logged_account['content']['lastName']}", wraplength=380, anchor="nw")
+        name_label.pack(side="top", padx=10, pady=3, fill = "x", expand=True)
+
+        lahir_label = ctk.CTkLabel(container, 
+                                   text=f"Tempat, Tanggal Lahir\t: {self.logged_account['content']['tempat']}, {self.logged_account['content']['tanggalLahir']}/{self.logged_account['content']['bulanLahir']}/{self.logged_account['content']['tahunLahir']}", wraplength=380, anchor="nw")
+        lahir_label.pack(side="top", padx=10, pady=3, fill = "x", expand=True)
+
+        akun_dibuat = ctk.CTkLabel(container, text=f"Akun dibuat\t\t: {self.logged_account['content']['tanggalDibuat']}", wraplength=380, anchor="nw")
+        akun_dibuat.pack(side="top", padx=10, pady=3, fill = "x", expand=True)
+
+        # Button Frame
+        button_container = ctk.CTkFrame(container, fg_color="transparent")
+        button_container.pack(side="top", pady=3, fill = "both", expand=True)
+        button_container.columnconfigure((0, 1), weight=1, uniform="column")
+        button_container.rowconfigure((0), weight=1, uniform="row")
+
+        # Add buttons to the container
+        change_password_button = ctk.CTkButton(button_container, text="Edit Profile", command=self.edit_profile)
+        change_password_button.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+        bookshelf_button = ctk.CTkButton(button_container, text="Bookshelf", command=self.bookshelf)
+        bookshelf_button.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+
+        edit_profile = ctk.CTkButton(button_container, text="Change Password", command=self.change_password)
+        edit_profile.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
+
+        logout_button = ctk.CTkButton(button_container, text="Logout", command=self.logout)
+        logout_button.grid(row=1, column=0, columnspan=3, padx=10, pady=10, sticky="nsew")
+
+    def edit_profile(self):
+        self.geometry("700x200")
+
+        for widget in self.winfo_children():
+            widget.destroy()
+
+        container = ctk.CTkFrame(self, fg_color="transparent")
+        container.pack(padx=3, pady=3, fill="both", expand=True)
+        container.columnconfigure((0, 1), weight=1, uniform="column")
+
+        email_label = ctk.CTkLabel(container, text=f"Email\t\t\t: {self.logged_account['email']}", wraplength=380, anchor="nw", height=20)
+        email_label.grid(row=0, column=0, columnspan=2, padx=10, pady=3, sticky="nsew")
+
+        name_label = ctk.CTkLabel(container, text=f"Nama\t\t\t: {self.logged_account['content']['firstName']} {self.logged_account['content']['lastName']}", wraplength=380, anchor="nw", height=20)
+        name_label.grid(row=1, column=0, padx=10, pady=3, sticky="nsew")
+
+        lahir_label = ctk.CTkLabel(container, 
+                                   text=f"Tempat, Tanggal Lahir\t: {self.logged_account['content']['tempat']}, {self.logged_account['content']['tanggalLahir']}/{self.logged_account['content']['bulanLahir']}/{self.logged_account['content']['tahunLahir']}", wraplength=380, anchor="nw", height=20)
+        lahir_label.grid(row=2, column=0, padx=10, pady=3, sticky="nsew")
+
+        # buttons
+        edit_name_button = ctk.CTkButton(container, text="Edit", command=self.edit_name)
+        edit_name_button.grid(row=1, column=1, padx=10, pady=10, sticky="nse")
+
+        edit_tempat_tanggal_lahir_button = ctk.CTkButton(container, text="Edit", command=self.edit_tempat_tanggal_lahir)
+        edit_tempat_tanggal_lahir_button.grid(row=2, column=1, padx=10, pady=10, sticky="nse")
+
+        back_button = ctk.CTkButton(container, text="Back", command=self.back)
+        back_button.grid(row=4, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+
+    def edit_email(self):
+        _edit(self, "email")
+
+    def edit_name(self):
+        pass
+
+    def edit_tempat_tanggal_lahir(self):
+        pass
+
+    def back(self):
+        self.widget()
+
+    def bookshelf(self):
+        pass
+
+    def change_password(self):
+        pass
+
+    def logout(self):
+        self.destroy()
+        self.master.destroy()
+
+class _edit(ctk.CTkToplevel):
+    def __init__(self, master, target, *args, **kwargs):
+        super().__init__(master, *args, **kwargs)
+        self.target = target
+        self.geometry("500x300")
+
+        self.title("Edit {target}")
+
+        label = ctk.CTkLabel(self, text=f"Edit {target}")
+        label.pack(side="left", padx=3, pady=3, fill="both", expand=True)
+
+        entry = ctk.CTkEntry(self)
+        entry.pack(side="left", padx=3, pady=3, fill="both", expand=True)
+
+        button = ctk.CTkButton(self, text="Save", command=self.save)
+        button.pack(padx=3, pady=3, fill="both", expand=True)
+
+    def save(self):
+        pass
+    
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # TODOS
+    # 1. BUAT FUNCTION SAVE CHANGE DI MAIN + DI ACCOUNT
+    # 2. ISI BOOKSHELF
+    # 3. BUTTON SIMPAN BUKU MASUK KE BOOKSHELF
+    # 4. FITUR REGISTER
 
 if __name__ == "__main__":
     app = Main()

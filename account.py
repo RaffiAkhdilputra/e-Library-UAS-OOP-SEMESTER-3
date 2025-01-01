@@ -46,9 +46,3 @@ def get_bookshelf(username:str):
     for user in data:
         if user["email"] == username.lower():
             return user["content"]["bookshelf"]
-
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# BUAT PROFILE
-# ISI BOOKSHELF
-# BUTTON SIMPAN BUKU MASUK KE BOOKSHELF
-# FITUR REGISTER
