@@ -17,7 +17,7 @@ def check_password(password, hashed_password):
 def verify_login(email:str, password:str):
     for user in data:
         if user["email"] == email.lower():
-            if not check_password(password, user["hashed"].encode('utf-8')):  # Decode stored hash for comparison
+            if not check_password(password, user["hashed"].encode('utf-8')):
                 return False, "Wrong password"
             return True, ""
     return False, "User not found"
@@ -50,19 +50,28 @@ def add_new_account(email, confirmed_password, first_name, last_name, tempat, ta
     with open('database/account.json', 'w') as file:
         json.dump(data, file, indent=4)
 
-def edit_nama(target, firstName, lastName):
+def save_changes():
+    with open('database/account.json', 'w') as file:
+        json.dump(data, file, indent=4)
+
+def edit_nama(email, firstName, lastName):
     for user in data:
-        if user["email"].lower() == target.lower():
+        if user["email"].lower() == email.lower():
             user["content"]["firstName"] = firstName
             user["content"]["lastName"] = lastName
 
-def edit_tempat_tanggal_lahir(target, tempat, tanggal_lahir, bulan_lahir, tahun_lahir):
+def edit_tempat_tanggal_lahir(email, tempat, tanggal_lahir, bulan_lahir, tahun_lahir):
     for user in data:
-        if user["email"].lower() == target.lower():
+        if user["email"].lower() == email.lower():
             user["content"]["tempat"] = tempat
             user["content"]["tanggalLahir"] = tanggal_lahir
             user["content"]["bulanLahir"] = bulan_lahir
             user["content"]["tahunLahir"] = tahun_lahir
+
+def get_user(email:str):
+    for user in data:
+        if user["email"].lower() == email.lower():
+            return user
 
 def _get_email(email:str):
     for user in data:
@@ -89,3 +98,16 @@ def get_bookshelf(email:str):
     for user in data:
         if user["email"] == email.lower():
             return user["content"]["bookshelf"]
+        
+def add_book_to_bookshelf(email, book_id):
+    for user in data:
+        if user["email"] == email.lower():
+            for book in user["content"]["bookshelf"]:
+                if book == book_id:
+                    return
+            user["content"]["bookshelf"].append(book_id)
+
+def remove_book_from_bookshelf(email, book_id):
+    for user in data:
+        if user["email"] == email.lower():
+            user["content"]["bookshelf"].remove(book_id)

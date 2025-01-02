@@ -12,6 +12,7 @@ class App(abc.ABC):
         self.root = ctk.CTk()
         self.root.geometry("800x600")
         self.root.resizable(False, False)
+        self.root.after(100, self.root.focus_force)
 
     @abstractmethod
     def widgets(self):
@@ -26,18 +27,17 @@ class Main(App):
         self.max_cards = 10
         self.cursor = 0
         self.username = None
+        self.books = None
 
         self.root = ctk.CTk()
         self.root.resizable(False, False)
-
-        self.books = None
-
+        self.root.iconbitmap("logo.ico")
         self.root.title("e-Library")
 
         self.login_widget()
 
-    def login_widget(self): # BENERIN LOGIN DAN BUAT FITUR REGISTER (RESIZE FRAME, BUAT FORM SIMPLE SESUAI FIGMA)
-        self.root.geometry("500x200")
+    def login_widget(self):
+        self.root.geometry("500x250")
 
         # Clear Frames
         for widget in self.root.winfo_children():
@@ -52,10 +52,10 @@ class Main(App):
         entry_frame.columnconfigure((0, 1), weight=1, uniform="column")
         entry_frame.rowconfigure((0, 1), weight=1, uniform="row")
 
-        button_frame = ctk.CTkFrame(login_frame)
-        button_frame.pack(padx=3, pady=3, fill="both", expand=True)
-        button_frame.columnconfigure((0, 1), weight=1, uniform="column")
-        entry_frame.rowconfigure((0), weight=1, uniform="row")
+        self.login_button_frame = ctk.CTkFrame(login_frame)
+        self.login_button_frame.pack(padx=3, pady=3, fill="both", expand=True)
+        self.login_button_frame.columnconfigure((0, 1), weight=1, uniform="column")
+        self.login_button_frame.rowconfigure((0), weight=1, uniform="row")
 
         # Login Frame Content
         username_label = ctk.CTkLabel(entry_frame, text="Username\t:")
@@ -70,19 +70,18 @@ class Main(App):
         self.password_entry = ctk.CTkEntry(entry_frame, placeholder_text="Enter your password", show="*")
         self.password_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
 
-        self.login_button = ctk.CTkButton(button_frame, text="Login", command=self.login)
-        self.login_button.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+        self.login_button = ctk.CTkButton(self.login_button_frame, text="Login", command=self.login)
+        self.login_button.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
-        self.register_button = ctk.CTkButton(button_frame, text="Register", command=self.register)
-        self.register_button.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
-        
+        self.register_button = ctk.CTkButton(self.login_button_frame, text="Register", command=self.register)
+        self.register_button.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
 
     def login(self):
         _access, _message = account.verify_login(self.username_entry.get(), self.password_entry.get())
 
         if not _access:
-            print(self.username_entry.get(), self.password_entry.get())
-            print(_message)
+            warning = ctk.CTkLabel(self.login_button_frame, text=_message, text_color="red")
+            warning.grid(row=1, column=0, columnspan=2, padx=5, pady=5, sticky="ew")
         else:
             self.username = self.username_entry.get()
             print(f"Logged in as: {self.username}")
@@ -195,6 +194,10 @@ class Main(App):
             else:
                 print(_message)
         else:
+            for widget in self.register_frame.winfo_children():
+                if widget.winfo_class() == "CTkLabel":
+                    widget.destroy()
+
             message = ctk.CTkLabel(self.register_frame, text="Password and Confirm Password do not match", text_color="red")
             message.pack(pady=5, fill="x", expand=True)
 
@@ -301,7 +304,7 @@ class Main(App):
             title_label.grid(row=2, column=0, padx=5, pady=5, sticky="sew")
             page_label = ctk.CTkLabel(card, text=f"Pages: {page}")
             page_label.grid(row=3, column=0, padx=5, pady=5, sticky="sew")
-            view_button = ctk.CTkButton(card, text="View", command=lambda b=book, b_id=book_id: self.open_description(b, b_id))
+            view_button = ctk.CTkButton(card, text="View", command= lambda b = book, id = book_id: self.open_description(b, id, self.username))
             view_button.grid(row=4, column=0, padx=5, pady=5, sticky="sew")
 
             self.cards.append(card)
@@ -323,8 +326,8 @@ class Main(App):
             self.cursor -= self.max_cards
             self.generate_card()
 
-    def open_description(self, book, target_id):
-        Description(self.root, book, target_id)
+    def open_description(self, book, book_id, logged_account):
+        Description(self.root, book, book_id, logged_account)
 
     def open_profile(self, logged_account):
         Profile(self.root, logged_account)
@@ -336,11 +339,13 @@ class Main(App):
         self.root.destroy()
 
 class Description(ctk.CTkToplevel):
-    def __init__(self, master, book, target_id, *args, **kwargs):
+    def __init__(self, master, book, book_id, logged_account, *args, **kwargs):
         super().__init__(master)
         self.book = book
-        self.target_id = target_id
+        self.book_id = book_id
+        self.logged_account = logged_account
 
+        self.after(100, self.focus_force)
         self.title("Book Description")
         self.geometry("500x600")
         
@@ -393,13 +398,17 @@ class Description(ctk.CTkToplevel):
         read_links_button.pack(padx=10, pady=10, fill = "x", expand=True)
 
     def save(self):
-        pass
+        account.add_book_to_bookshelf(self.logged_account, self.book["volumeInfo"]["industryIdentifiers"][0]["identifier"])
+        account.save_changes()
 
 class Profile(ctk.CTkToplevel):
     def __init__(self, master, logged_account, *args, **kwargs):
         super().__init__(master)
         self.logged_account = account.get_user(logged_account)
-        self.title("Account")
+
+        self.title("Profile")
+        self.iconbitmap("logo.ico")
+        self.after(100, self.focus_force)
 
         self.widget()
 
@@ -420,7 +429,7 @@ class Profile(ctk.CTkToplevel):
         name_label.pack(side="top", padx=10, pady=3, fill = "x", expand=True)
 
         lahir_label = ctk.CTkLabel(container, 
-                                   text=f"Tempat, Tanggal Lahir\t: {self.logged_account['content']['tempat']}, {self.logged_account['content']['tanggalLahir']}/{self.logged_account['content']['bulanLahir']}/{self.logged_account['content']['tahunLahir']}", wraplength=380, anchor="nw")
+                                   text=f"Tempat, Tanggal Lahir\t: {self.logged_account['content']['tempat']}, {self.logged_account['content']['tanggalLahir']} {self.logged_account['content']['bulanLahir']} {self.logged_account['content']['tahunLahir']}", wraplength=380, anchor="nw")
         lahir_label.pack(side="top", padx=10, pady=3, fill = "x", expand=True)
 
         akun_dibuat = ctk.CTkLabel(container, text=f"Akun dibuat\t\t: {self.logged_account['content']['tanggalDibuat']}", wraplength=380, anchor="nw")
@@ -463,7 +472,7 @@ class Profile(ctk.CTkToplevel):
         name_label.grid(row=1, column=0, padx=10, pady=3, sticky="nsew")
 
         lahir_label = ctk.CTkLabel(container, 
-                                   text=f"Tempat, Tanggal Lahir\t: {self.logged_account['content']['tempat']}, {self.logged_account['content']['tanggalLahir']}/{self.logged_account['content']['bulanLahir']}/{self.logged_account['content']['tahunLahir']}", wraplength=380, anchor="nw", height=20)
+                                   text=f"Tempat, Tanggal Lahir\t: {self.logged_account['content']['tempat']}, {self.logged_account['content']['tanggalLahir']} {self.logged_account['content']['bulanLahir']} {self.logged_account['content']['tahunLahir']}", wraplength=380, anchor="nw", height=20)
         lahir_label.grid(row=2, column=0, padx=10, pady=3, sticky="nsew")
 
         # buttons
@@ -477,52 +486,179 @@ class Profile(ctk.CTkToplevel):
         back_button.grid(row=4, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
         
     def edit_name(self):
-        _edit(self, "nama")
+        edit_window(self, self.logged_account, "nama")
 
     def edit_tempat_tanggal_lahir(self):
-        _edit(self, "Tempat, Tanggal Lahir")
-
-    def back(self):
-        self.widget()
+        edit_window(self, self.logged_account, "Tempat, Tanggal Lahir")
 
     def bookshelf(self):
-        pass
+        for widget in self.winfo_children():
+            widget.destroy()
+
+        self.geometry("700x500")
+        self.resizable(False, True)
+        self.title("Bookshelf")
+
+        bookshelf = account.get_bookshelf(self.logged_account["email"])
+
+        container = ctk.CTkScrollableFrame(self, fg_color="transparent")
+        container.pack(side="top", padx=3, pady=3, fill="both", expand=True)
+        container.columnconfigure((0, 1), weight=1, uniform="column")
+
+        if not bookshelf:
+            _message = ctk.CTkLabel(container, text="Bookshelf is empty.", wraplength=380)
+            _message.grid(row=0, column=0, columnspan=2, padx=10, pady=3, sticky="nsew")
+        else:
+            for i, book_id in enumerate(bookshelf):
+                try:
+                    book_data = get_book(book_id, max=1)["items"][0]
+                    title = book_data["volumeInfo"].get("title", "Unknown Title")
+                    pages = book_data["volumeInfo"].get("pageCount", "Unknown Pages")
+                    penulis = book_data["volumeInfo"].get("authors", ["Unknown Penulis"])[0]
+                    publisher = book_data["volumeInfo"].get("publisher", "Unknown Publisher")
+
+                    image_url = book_data["volumeInfo"].get("imageLinks", {}).get("smallThumbnail", "")
+                    photo = None
+                    if image_url:
+                        try:
+                            with urllib.request.urlopen(image_url) as u:
+                                raw_data = u.read()
+                            image = Image.open(io.BytesIO(raw_data))
+                            photo = ImageTk.PhotoImage(image)
+                        except Exception as e:
+                            print(f"Error fetching or opening image: {e}")
+
+                    card = ctk.CTkFrame(container, border_color="black", corner_radius=10)
+                    card.grid(row=i, column=0, columnspan=2, padx=10, pady=5, sticky="nsew")
+                    card.columnconfigure((0, 1), weight=1, uniform="column")
+                    card.rowconfigure((0, 1, 2, 3), weight=1, uniform="row")
+
+                    if photo:
+                        image_label = ctk.CTkLabel(card, image=photo, text="")
+                        image_label.image = photo
+                        image_label.grid(row=0, column=0, rowspan=3, padx=10, pady=10, sticky="nsew")
+
+                    # Details
+                    title_label = ctk.CTkLabel(card, text=title, font=("Arial", 14, "bold"), wraplength=250, anchor="nw")
+                    title_label.grid(row=0, column=1, padx=10, pady=10, sticky="nw")
+
+                    page_label = ctk.CTkLabel(card, text=f"Pages: {pages}", wraplength=250, anchor="nw")
+                    page_label.grid(row=1, column=1, padx=10, pady=3, sticky="nw")
+
+                    penulis_label = ctk.CTkLabel(card, text=f"Penulis: {penulis}", wraplength=250, anchor="nw")
+                    penulis_label.grid(row=2, column=1, padx=10, pady=3, sticky="nw")
+
+                    publisher_label = ctk.CTkLabel(card, text=f"Publisher: {publisher}", wraplength=250, anchor="nw")
+                    publisher_label.grid(row=3, column=1, padx=10, pady=5, sticky="nw")
+                    
+                    # Buttons
+                    remove_button = ctk.CTkButton(card, text="Remove", command=lambda b_id=book_id: account.remove_book_from_bookshelf(self.logged_account["email"], b_id))
+                    remove_button.grid(row=4, column=1, padx=10, pady=10, sticky="ew")
+
+                    view_button = ctk.CTkButton(card, text="View", command=lambda b=book_data, b_id=book_id: self.open_description(b, b_id, self.logged_account["email"]))
+                    view_button.grid(row=4, column=0, padx=10, pady=10, sticky="ew")
+
+                except Exception as e:
+                    print(f"Error loading book data: {e}")
+
+        refresh_button = ctk.CTkButton(self, text="Refresh", command=self.bookshelf)
+        refresh_button.pack(side="top", padx=10, pady=10, fill = "x", expand=False)
+
+        back_button = ctk.CTkButton(self, text="Back", command=self.back)
+        back_button.pack(side="top", padx=10, pady=10, fill = "x", expand=False)
+    
+    def open_description(self, book, book_id, logged_account):
+        Description(self, book, book_id, logged_account)
 
     def change_password(self):
         pass
+
+    def back(self):
+        self.widget()
 
     def logout(self):
         self.destroy()
         self.master.destroy()
 
-class _edit(ctk.CTkToplevel):
-    def __init__(self, master, target, *args, **kwargs):
+class edit_window(ctk.CTkToplevel):
+    def __init__(self, master, logged_account, target, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
+        self.logged_account = logged_account
         self.target = target
-        self.geometry("300x100")
-        self.resizable(False, False)
+        self.after(100, self.focus_force)
 
+        self.resizable(False, False)
         self.title(f"Edit {target}")
 
         frame = ctk.CTkFrame(self)
         frame.pack(padx=3, pady=3, fill="both", expand=True)
         frame.columnconfigure((0, 1), weight=1, uniform="column")
-        frame.rowconfigure((0,1), weight=1, uniform="row")
 
-        label = ctk.CTkLabel(frame, text=f"Edit {target}\t:")
-        label.grid(row=0, column=0, padx=3, pady=3, sticky="ew")
+        if target == "Tempat, Tanggal Lahir":
+            self.geometry("400x300")
+            frame.rowconfigure((0, 1, 2, 3, 4), weight=1, uniform="row")
 
-        entry = ctk.CTkEntry(frame)
-        entry.grid(row=0, column=1, padx=3, pady=3, sticky="ew")
+            # Tempat dan Tanggal Lahir
+            self.tanggal_var = ctk.StringVar(value="1")
+            self.bulan_var = ctk.StringVar(value="January")
+            self.tahun_var = ctk.StringVar(value="2000")
 
-        cancel_button = ctk.CTkButton(frame, text="Cancel", command=self.destroy)
-        cancel_button.grid(row=1, column=0, padx=3, pady=3, sticky="ew")
+            tempat_label = ctk.CTkLabel(frame, text="Tempat\t\t:")
+            tempat_label.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
+            self.tempat_menu = ctk.CTkEntry(frame, placeholder_text="Masukkan Tempat Lahir")
+            self.tempat_menu.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
-        save_button = ctk.CTkButton(frame, text="Save", command=self.save)
-        save_button.grid(row=1, column=1, padx=3, pady=3, sticky="ew")
+            tanggal_label = ctk.CTkLabel(frame, text="Tanggal\t\t:")
+            tanggal_label.grid(row=1, column=0, padx=5, pady=5, sticky="ew")
+            self.tanggal_menu = ctk.CTkOptionMenu(frame, values=[str(i) for i in range(1, 32)], variable=self.tanggal_var)
+            self.tanggal_menu.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+
+            bulan_label = ctk.CTkLabel(frame, text="Bulan\t\t:")
+            bulan_label.grid(row=2, column=0, padx=5, pady=5, sticky="ew")
+            self.bulan_menu = ctk.CTkOptionMenu(frame, values=["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"], variable=self.bulan_var)
+            self.bulan_menu.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
+
+            tahun_label = ctk.CTkLabel(frame, text="Tahun\t\t:")
+            tahun_label.grid(row=3, column=0, padx=5, pady=5, sticky="ew")
+            self.tahun_menu = ctk.CTkOptionMenu(frame, values=[str(i) for i in range(1980, 2026)], variable=self.tahun_var)
+            self.tahun_menu.grid(row=3, column=1, padx=5, pady=5, sticky="ew")
+
+            cancel_button = ctk.CTkButton(frame, text="Cancel", command=self.destroy)
+            cancel_button.grid(row=4, column=0, padx=3, pady=3, sticky="ew")
+
+            save_button = ctk.CTkButton(frame, text="Save", command=self.save)
+            save_button.grid(row=4, column=1, padx=3, pady=3, sticky="ew")
+        
+        else:
+            self.geometry("400x100")
+            frame.rowconfigure((0, 1, 2), weight=1, uniform="row")
+
+            firstName_label = ctk.CTkLabel(frame, text=f"First Name\t:")
+            firstName_label.grid(row=0, column=0, padx=3, pady=3, sticky="ew")
+
+            self.firstName_entry = ctk.CTkEntry(frame, placeholder_text="Enter your first name")
+            self.firstName_entry.grid(row=0, column=1, padx=3, pady=3, sticky="ew")
+
+            lastName_label = ctk.CTkLabel(frame, text="Last Name\t:")
+            lastName_label.grid(row=1, column=0, padx=3, pady=3, sticky="ew")
+
+            self.lastName_label = ctk.CTkEntry(frame, placeholder_text="Enter your last name")
+            self.lastName_label.grid(row=1, column=1, padx=3, pady=3, sticky="ew")
+
+            cancel_button = ctk.CTkButton(frame, text="Cancel", command=self.destroy)
+            cancel_button.grid(row=2, column=0, padx=3, pady=3, sticky="ew")
+
+            save_button = ctk.CTkButton(frame, text="Save", command=self.save)
+            save_button.grid(row=2, column=1, padx=3, pady=3, sticky="ew")
 
     def save(self):
-        pass
+        if self.target == "Tempat, Tanggal Lahir":
+            account.edit_tempat_tanggal_lahir(self.logged_account["email"], self.tempat_menu.get(), self.tanggal_var.get(), self.bulan_var.get(), self.tahun_var.get())
+        else:
+            account.edit_nama(self.logged_account["email"], self.firstName_entry.get(), self.lastName_label.get())
+        
+        self.destroy()
+        account.save_changes()
     
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # TODOS

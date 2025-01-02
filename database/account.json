@@ -5,13 +5,16 @@
         "hashed": "$2b$12$OT6dxfQmKySUW/jwvkGQD.1r1HcSxHi9V.5.PlR7wTkDdi89T.2by",
         "content": {
             "firstName": "admin",
-            "lastName": "admin",
-            "tempat": "Jakarta",
+            "lastName": "Joko",
+            "tempat": "Surabaya",
             "tanggalLahir": "1",
             "bulanLahir": "January",
             "tahunLahir": "2000",
             "tanggalDibuat": "2024-12-31",
-            "bookshelf": []
+            "bookshelf": [
+                "9786027123724",
+                "9786024333232"
+            ]
         }
     },
     {
