@@ -75,6 +75,7 @@ class Main(App):
 
         self.register_button = ctk.CTkButton(button_frame, text="Register", command=self.register)
         self.register_button.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+        
 
     def login(self):
         _access, _message = account.verify_login(self.username_entry.get(), self.password_entry.get())
@@ -88,7 +89,114 @@ class Main(App):
             self.widgets()
 
     def register(self):
-        pass
+        self.root.geometry("500x400")
+
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        self.register_widget()
+
+    def register_widget(self):
+        self.register_frame = ctk.CTkFrame(self.root)
+        self.register_frame.pack(padx=3, pady=3, fill="both", expand=True)
+
+        entry_frame = ctk.CTkFrame(self.register_frame)
+        entry_frame.pack(padx=3, pady=3, fill="both", expand=True)
+        entry_frame.columnconfigure((0, 1), weight=1, uniform="column")
+        entry_frame.rowconfigure((0, 1, 2, 3, 4, 5), weight=1, uniform="row")
+
+        button_frame = ctk.CTkFrame(self.register_frame)
+        button_frame.pack(padx=3, pady=3, fill="both", expand=True)
+        button_frame.columnconfigure((0, 1), weight=1, uniform="column")
+
+        # Email
+        email_label = ctk.CTkLabel(entry_frame, text="Email\t\t:")
+        email_label.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+        self.email_entry = ctk.CTkEntry(entry_frame, placeholder_text="Enter your email")
+        self.email_entry.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+
+        # First Name
+        firstName_label = ctk.CTkLabel(entry_frame, text="First Name\t:")
+        firstName_label.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
+        self.firstName_entry = ctk.CTkEntry(entry_frame, placeholder_text="Enter your name")
+        self.firstName_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+
+        # Last Name
+        lastName_label = ctk.CTkLabel(entry_frame, text="Last Name\t:")
+        lastName_label.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
+        self.lastName_entry = ctk.CTkEntry(entry_frame, placeholder_text="Enter your last name")
+        self.lastName_entry.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
+
+        # Tempat dan Tanggal Lahir
+        self.tanggal_var = ctk.StringVar(value="1")
+        self.bulan_var = ctk.StringVar(value="January")
+        self.tahun_var = ctk.StringVar(value="2000")
+
+        tempat_label = ctk.CTkLabel(entry_frame, text="Tempat\t\t:")
+        tempat_label.grid(row=3, column=0, padx=5, pady=5, sticky="nsew")
+        self.tempat_menu = ctk.CTkEntry(entry_frame, placeholder_text="Masukkan Tempat Lahir")
+        self.tempat_menu.grid(row=3, column=1, padx=5, pady=5, sticky="ew")
+
+        tanggal_label = ctk.CTkLabel(entry_frame, text="Tanggal\t\t:")
+        tanggal_label.grid(row=4, column=0, padx=5, pady=5, sticky="nsew")
+        self.tanggal_menu = ctk.CTkOptionMenu(entry_frame, values=[str(i) for i in range(1, 32)], variable=self.tanggal_var)
+        self.tanggal_menu.grid(row=4, column=1, padx=5, pady=5, sticky="ew")
+
+        bulan_label = ctk.CTkLabel(entry_frame, text="Bulan\t\t:")
+        bulan_label.grid(row=5, column=0, padx=5, pady=5, sticky="nsew")
+        self.bulan_menu = ctk.CTkOptionMenu(entry_frame, values=["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"], variable=self.bulan_var)
+        self.bulan_menu.grid(row=5, column=1, padx=5, pady=5, sticky="ew")
+
+        tahun_label = ctk.CTkLabel(entry_frame, text="Tahun\t\t:")
+        tahun_label.grid(row=6, column=0, padx=5, pady=5, sticky="nsew")
+        self.tahun_menu = ctk.CTkOptionMenu(entry_frame, values=[str(i) for i in range(1980, 2026)], variable=self.tahun_var)
+        self.tahun_menu.grid(row=6, column=1, padx=5, pady=5, sticky="ew")
+
+        # Password
+        password_label = ctk.CTkLabel(entry_frame, text="Password\t:")
+        password_label.grid(row=7, column=0, padx=5, pady=5, sticky="nsew")
+        self.password_entry = ctk.CTkEntry(entry_frame, placeholder_text="Enter your password", show="*")
+        self.password_entry.grid(row=7, column=1, padx=5, pady=5, sticky="ew")
+
+        confirm_password_label = ctk.CTkLabel(entry_frame, text="Confirm Password\t:")
+        confirm_password_label.grid(row=8, column=0, padx=5, pady=5, sticky="nsew")
+        self.confirm_password_entry = ctk.CTkEntry(entry_frame, placeholder_text="Confirm your password", show="*")
+        self.confirm_password_entry.grid(row=8, column=1, padx=5, pady=5, sticky="ew")
+
+        # Buttons
+        register_button = ctk.CTkButton(button_frame, text="Register", command=self.register_user)
+        register_button.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+
+        cancel_button = ctk.CTkButton(button_frame, text="Cancel", command=self.widgets)
+        cancel_button.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+
+    def register_user(self):
+        if self.password_entry.get() == self.confirm_password_entry.get():
+            tempat = self.tempat_menu.get()
+            tanggal = self.tanggal_var.get()
+            bulan = self.bulan_var.get()
+            tahun = self.tahun_var.get()
+
+            print(
+                self.email_entry.get(),
+                self.firstName_entry.get(),
+                self.lastName_entry.get(),
+                tempat, tanggal, bulan, tahun,
+                self.confirm_password_entry.get()
+            )
+
+            # tambah akun baru
+            account.add_new_account(self.email_entry.get(), self.confirm_password_entry.get(), self.firstName_entry.get(), self.lastName_entry.get(), tempat, tanggal, bulan, tahun)
+
+            _access, _message = account.verify_login(self.email_entry.get(), self.confirm_password_entry.get())
+
+            if _access:
+                self.widgets()
+            else:
+                print(_message)
+        else:
+            message = ctk.CTkLabel(self.register_frame, text="Password and Confirm Password do not match", text_color="red")
+            message.pack(pady=5, fill="x", expand=True)
 
     def widgets(self):
         self.root.geometry("800x600")
@@ -278,8 +386,14 @@ class Description(ctk.CTkToplevel):
         description_text.configure(state="disabled")
         description_text.pack(pady=10, padx=10, fill="both", expand=True)
 
+        save_button = ctk.CTkButton(self.container, text="Save To Bookshelf", command=self.save)
+        save_button.pack(padx=10, pady=10, fill = "x", expand=True)
+
         read_links_button = ctk.CTkButton(self.container, text="Read Online", command=lambda: webbrowser.open(read_links))
         read_links_button.pack(padx=10, pady=10, fill = "x", expand=True)
+
+    def save(self):
+        pass
 
 class Profile(ctk.CTkToplevel):
     def __init__(self, master, logged_account, *args, **kwargs):
@@ -333,6 +447,7 @@ class Profile(ctk.CTkToplevel):
 
     def edit_profile(self):
         self.geometry("700x200")
+        self.resizable(False, False)
 
         for widget in self.winfo_children():
             widget.destroy()
@@ -360,15 +475,12 @@ class Profile(ctk.CTkToplevel):
 
         back_button = ctk.CTkButton(container, text="Back", command=self.back)
         back_button.grid(row=4, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
-
-    def edit_email(self):
-        _edit(self, "email")
-
+        
     def edit_name(self):
-        pass
+        _edit(self, "nama")
 
     def edit_tempat_tanggal_lahir(self):
-        pass
+        _edit(self, "Tempat, Tanggal Lahir")
 
     def back(self):
         self.widget()
@@ -387,18 +499,27 @@ class _edit(ctk.CTkToplevel):
     def __init__(self, master, target, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
         self.target = target
-        self.geometry("500x300")
+        self.geometry("300x100")
+        self.resizable(False, False)
 
-        self.title("Edit {target}")
+        self.title(f"Edit {target}")
 
-        label = ctk.CTkLabel(self, text=f"Edit {target}")
-        label.pack(side="left", padx=3, pady=3, fill="both", expand=True)
+        frame = ctk.CTkFrame(self)
+        frame.pack(padx=3, pady=3, fill="both", expand=True)
+        frame.columnconfigure((0, 1), weight=1, uniform="column")
+        frame.rowconfigure((0,1), weight=1, uniform="row")
 
-        entry = ctk.CTkEntry(self)
-        entry.pack(side="left", padx=3, pady=3, fill="both", expand=True)
+        label = ctk.CTkLabel(frame, text=f"Edit {target}\t:")
+        label.grid(row=0, column=0, padx=3, pady=3, sticky="ew")
 
-        button = ctk.CTkButton(self, text="Save", command=self.save)
-        button.pack(padx=3, pady=3, fill="both", expand=True)
+        entry = ctk.CTkEntry(frame)
+        entry.grid(row=0, column=1, padx=3, pady=3, sticky="ew")
+
+        cancel_button = ctk.CTkButton(frame, text="Cancel", command=self.destroy)
+        cancel_button.grid(row=1, column=0, padx=3, pady=3, sticky="ew")
+
+        save_button = ctk.CTkButton(frame, text="Save", command=self.save)
+        save_button.grid(row=1, column=1, padx=3, pady=3, sticky="ew")
 
     def save(self):
         pass
