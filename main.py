@@ -166,7 +166,7 @@ class Main(App):
         register_button = ctk.CTkButton(button_frame, text="Register", command=self.register_user)
         register_button.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
 
-        cancel_button = ctk.CTkButton(button_frame, text="Cancel", command=self.widgets)
+        cancel_button = ctk.CTkButton(button_frame, text="Cancel", command=self.login_widget)
         cancel_button.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
 
     def register_user(self):

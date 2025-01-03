@@ -1,9 +1,23 @@
+import os
+import sys
 import json
 import bcrypt
 import datetime
 
-# Load database
-with open('database/account.json', 'r') as file:
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+database_path = resource_path("database/account.json")
+
+if not os.path.exists(database_path):
+    raise FileNotFoundError(f"File not found: {database_path}")
+
+# Contoh membuka file
+with open(database_path, 'r') as file:
     data = json.load(file)
 
 def hash_password(password):
@@ -47,11 +61,11 @@ def add_new_account(email, confirmed_password, first_name, last_name, tempat, ta
 
     data.append(new_user)
 
-    with open('database/account.json', 'w') as file:
+    with open(database_path, 'w') as file:
         json.dump(data, file, indent=4)
 
 def save_changes():
-    with open('database/account.json', 'w') as file:
+    with open(database_path, 'w') as file:
         json.dump(data, file, indent=4)
 
 def edit_nama(email, firstName, lastName):
