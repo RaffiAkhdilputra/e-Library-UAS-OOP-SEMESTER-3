@@ -190,6 +190,7 @@ class Main(App):
             _access, _message = account.verify_login(self.email_entry.get(), self.confirm_password_entry.get())
 
             if _access:
+                self.username = self.email_entry.get()
                 self.widgets()
             else:
                 print(_message)
@@ -659,13 +660,6 @@ class edit_window(ctk.CTkToplevel):
         
         self.destroy()
         account.save_changes()
-    
-    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # TODOS
-    # 1. BUAT FUNCTION SAVE CHANGE DI MAIN + DI ACCOUNT
-    # 2. ISI BOOKSHELF
-    # 3. BUTTON SIMPAN BUKU MASUK KE BOOKSHELF
-    # 4. FITUR REGISTER
 
 if __name__ == "__main__":
     app = Main()

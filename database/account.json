@@ -30,5 +30,22 @@
             "tanggalDibuat": "2024-12-31",
             "bookshelf": []
         }
+    },
+    {
+        "_id": 2,
+        "email": "ijalaja123@gmail.com",
+        "hashed": "$2b$12$7lFj0XB0VN3TqoSXBMeNYepMWbLseSmeMIDXp4vlzGs5T1nCmsc0i",
+        "content": {
+            "firstName": "Rizal",
+            "lastName": "Jamal",
+            "tempat": "Jakarta",
+            "tanggalLahir": "15",
+            "bulanLahir": "January",
+            "tahunLahir": "2000",
+            "tanggalDibuat": "2025-01-03",
+            "bookshelf": [
+                "9786027123724"
+            ]
+        }
     }
 ]
