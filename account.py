@@ -82,6 +82,13 @@ def edit_tempat_tanggal_lahir(email, tempat, tanggal_lahir, bulan_lahir, tahun_l
             user["content"]["bulanLahir"] = bulan_lahir
             user["content"]["tahunLahir"] = tahun_lahir
 
+def edit_password(email, password):
+    new_password = hash_password(password)
+
+    for user in data:
+        if user["email"].lower() == email.lower():
+            user["hashed"] = new_password.decode('utf-8')
+
 def get_user(email:str):
     for user in data:
         if user["email"].lower() == email.lower():
