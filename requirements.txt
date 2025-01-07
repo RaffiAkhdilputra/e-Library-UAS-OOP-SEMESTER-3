@@ -1,0 +1,4 @@
+bcrypt
+customtkinter
+google-api-python-client
+pillow
