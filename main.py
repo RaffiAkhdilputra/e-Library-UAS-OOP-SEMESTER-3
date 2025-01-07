@@ -572,7 +572,7 @@ class Profile(ctk.CTkToplevel):
         Description(self, book, book_id, logged_account)
 
     def change_password(self):
-        pass
+        ChangePasswordWindow(self, self.logged_account)
 
     def back(self):
         self.widget()
@@ -660,6 +660,42 @@ class edit_window(ctk.CTkToplevel):
         
         self.destroy()
         account.save_changes()
+
+class ChangePasswordWindow(ctk.CTkToplevel):
+    def __init__(self, master, logged_account, *args, **kwargs):
+        super().__init__(master, *args, **kwargs)
+        self.logged_account = logged_account
+        self.geometry("400x100")
+        self.after(100, self.focus_force)
+
+        frame = ctk.CTkFrame(self)
+        frame.pack(padx=3, pady=3, fill="both", expand=True)
+        frame.columnconfigure((0, 1), weight=1, uniform="column")
+        frame.rowconfigure((0, 1, 2), weight=1, uniform="row")
+
+        for widget in frame.winfo_children():
+            widget.destroy()
+
+        password_label = ctk.CTkLabel(frame, text="Password\t:")
+        password_label.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
+
+        self.password_entry = ctk.CTkEntry(frame, placeholder_text="Enter your password", show="*")
+        self.password_entry.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+
+        cancel_button = ctk.CTkButton(frame, text="Cancel", command=self.destroy)
+        cancel_button.grid(row=1, column=0, padx=3, pady=3, sticky="ew")
+
+        continue_button = ctk.CTkButton(frame, text="Continue", command=self.check_password)
+        continue_button.grid(row=1, column=1, padx=3, pady=3, sticky="ew")
+
+    def check_password(self):
+        _ = account.check_password(self.password_entry.get().encode('utf-8'), self.logged_account["hashed"])
+
+        if _:
+            self.destroy()
+            ChangePasswordWindow(self.master, self.logged_account)
+        else:
+            ctk.CTkLabel(self, text="Wrong password").pack()
 
 if __name__ == "__main__":
     app = Main()
