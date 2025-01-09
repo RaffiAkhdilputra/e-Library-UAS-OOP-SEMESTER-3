@@ -1,4 +1,3 @@
-import googleapiclient as google
 from googleapiclient.discovery import build
 
 books_service = build('books', 'v1', developerKey='AIzaSyDXhIdwT93SDGDd6LyGAYI73UHtPmOacNM')

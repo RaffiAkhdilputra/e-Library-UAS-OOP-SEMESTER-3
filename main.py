@@ -1,9 +1,15 @@
-import io, urllib.request, webbrowser, abc, account
-import customtkinter as ctk
+import abc
+import account
+import io
 import tkinter as tk
-from google_books_api import *
-from PIL import Image, ImageTk
+import urllib.request
+import webbrowser
 from abc import abstractmethod
+
+import customtkinter as ctk
+from PIL import Image, ImageTk
+
+from google_books_api import *
 
 logged_account = None
 
@@ -666,6 +672,7 @@ class ChangePasswordWindow(ctk.CTkToplevel):
         super().__init__(master, *args, **kwargs)
         self.logged_account = logged_account
         self.geometry("400x100")
+        self.title("Change Password")
         self.after(100, self.focus_force)
 
         self.frame = ctk.CTkFrame(self)
