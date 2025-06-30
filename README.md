@@ -94,4 +94,4 @@ You'll be prompted to log in or register, then you'll have options to:
 
 ## Team
 
-Built by me **Raffi Akhdilputra**, **Hilma Zahra** and **Rivaldi Cahya** as part of our final exam for Object-Oriented Programing, semester 3
+Built by **Raffi Akhdilputra**, **Hilma Zahra** and **Rivaldi Cahya** as part of our final exam for Object-Oriented Programing, semester 3
