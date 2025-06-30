@@ -10,8 +10,7 @@
 - [Project Structure](#project-structure)  
 - [Installation](#installation)  
 - [Usage](#usage)  
-- [Contributing](#contributing)  
-- [License](#license)  
+- [Team](#Team)
 
 ---
 
